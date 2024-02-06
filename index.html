@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <input type="text" id="inputUrl" class="input-url" placeholder="Enter URL">
+        <button onclick="shortenUrl()" class="btn">Shorten URL</button>
+        <div id="shortUrl" class="short-url" style="display: none;"></div>
+        <button onclick="copyToClipboard()" id="copyBtn" class="btn-copy" style="display: none;">Copy</button>
+        <button onclick="openInNewTab()" id="newTabBtn" class="btn-new-tab" style="display: none;">Open in New Tab</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function shortenUrl() {
+            var inputUrl = $("#inputUrl").val();
+            $.ajax({
+                url: 'https://cleanuri.com/api/v1/shorten',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    "url": inputUrl
+                }),
+                success: function(response) {
+                    $("#shortUrl").text(response.result_url);
+                    $("#shortUrl").show();
+                    $("#copyBtn").show();
+                    $("#newTabBtn").show();
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        function copyToClipboard() {
+            var shortUrl = $("#shortUrl").text();
+            var tempInput = $("<input>");
+            $("body").append(tempInput);
+            tempInput.val(shortUrl).select();
+            document.execCommand("copy");
+            tempInput.remove();
+            alert("URL copied to clipboard: " + shortUrl);
+        }
+
+        function openInNewTab() {
+            var shortUrl = $("#shortUrl").text();
+            window.open(shortUrl, "_blank");
+        }
+    </script>
+</body>
+</html>
