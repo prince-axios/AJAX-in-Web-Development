@@ -1,11 +1,16 @@
+<!-- 2021-CS-130 -->
+<!-- Muhammad Affan Maqsood -->
+<!-- Ajax in Web Development -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Shortener</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <h1>URL Shortener</h1>
@@ -16,43 +21,49 @@
         <button onclick="openInNewTab()" id="newTabBtn" class="btn-new-tab" style="display: none;">Open in New Tab</button>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
         function shortenUrl() {
-            var inputUrl = $("#inputUrl").val();
-            $.ajax({
-                url: 'https://cleanuri.com/api/v1/shorten',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    "url": inputUrl
-                }),
-                success: function(response) {
-                    $("#shortUrl").text(response.result_url);
-                    $("#shortUrl").show();
-                    $("#copyBtn").show();
-                    $("#newTabBtn").show();
-                },
-                error: function(error) {
-                    console.log(error);
+            var inputUrl = document.getElementById("inputUrl").value;
+            var xhr = new XMLHttpRequest();
+            var proxyUrl = 'https://corsproxy.io/?';
+            var apiUrl = 'https://cleanuri.com/api/v1/shorten';
+
+            xhr.open("POST", proxyUrl + encodeURIComponent(apiUrl), true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        document.getElementById("shortUrl").textContent = response.result_url;
+                        document.getElementById("shortUrl").style.display = "block";
+                        document.getElementById("copyBtn").style.display = "block";
+                        document.getElementById("newTabBtn").style.display = "block";
+                    } else {
+                        console.error('Error:', xhr.statusText);
+                    }
                 }
-            });
+            };
+            xhr.send(JSON.stringify({ "url": inputUrl }));
         }
 
         function copyToClipboard() {
-            var shortUrl = $("#shortUrl").text();
-            var tempInput = $("<input>");
-            $("body").append(tempInput);
-            tempInput.val(shortUrl).select();
-            document.execCommand("copy");
-            tempInput.remove();
-            alert("URL copied to clipboard: " + shortUrl);
+            var shortUrl = document.getElementById("shortUrl").textContent;
+            navigator.clipboard.writeText(shortUrl)
+                .then(() => {
+                    alert("URL copied to clipboard: " + shortUrl);
+                })
+                .catch(err => {
+                    console.error('Error copying to clipboard:', err);
+                });
         }
 
         function openInNewTab() {
-            var shortUrl = $("#shortUrl").text();
+            var shortUrl = document.getElementById("shortUrl").textContent;
             window.open(shortUrl, "_blank");
         }
     </script>
 </body>
+
 </html>
